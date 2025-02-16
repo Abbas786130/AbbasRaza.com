@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Indus Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f3f3f3;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .calculator-container {
+      width: 300px;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .title {
+      font-size: 2.6rem;
+      font-weight: bold;
+      color: white;
+      background-color: #003366; /* Ajrak blue */
+      text-align: center;
+      padding: 10px;
+    }
+
+    .calculator {
+      background-color: #ffffff;
+    }
+
+    .screen {
+      background-color: #000;
+      color: #fff;
+      font-size: 1.8rem;
+      text-align: right;
+      padding: 15px;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+      padding: 10px;
+    }
+
+    button {
+      font-size: 1.2rem;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: #e0e0e0;
+      color: #000;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #d0d0d0;
+    }
+
+    button.operator {
+      background-color: #ff9500;
+      color: #fff;
+    }
+
+    button.operator:hover {
+      background-color: #e08700;
+    }
+
+    .convert-button {
+      grid-column: span 2;
+      font-size: 1.1rem;
+    }
+
+    .wide-button {
+      grid-column: span 2;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator-container">
+    <div class="title" id="title">جيئي سنڌ</div>
+    <div class="calculator">
+      <div class="screen" id="screen">۰</div>
+      <div class="buttons">
+        <button id="clear-btn" onclick="clearScreen()">ساف</button>
+        <button onclick="backspace()">◀</button>
+        <button onclick="operate('%')" class="operator">%</button>
+        <button onclick="operate('/')" class="operator">÷</button>
+        <button id="num7" onclick="appendNumber('۷')">۷</button>
+        <button id="num8" onclick="appendNumber('۸')">۸</button>
+        <button id="num9" onclick="appendNumber('۹')">۹</button>
+        <button onclick="operate('*')" class="operator">×</button>
+        <button id="num4" onclick="appendNumber('۴')">۴</button>
+        <button id="num5" onclick="appendNumber('۵')">۵</button>
+        <button id="num6" onclick="appendNumber('۶')">۶</button>
+        <button onclick="operate('-')" class="operator">-</button>
+        <button id="num1" onclick="appendNumber('۱')">۱</button>
+        <button id="num2" onclick="appendNumber('۲')">۲</button>
+        <button id="num3" onclick="appendNumber('۳')">۳</button>
+        <button onclick="operate('+')" class="operator">+</button>
+        <button id="toggle-btn" onclick="toggleNumerals()" class="convert-button">تبديل</button>
+        <button id="num0" onclick="appendNumber('۰')" class="wide-button">۰</button>
+        <button onclick="appendNumber('.')">.</button>
+        <button onclick="calculate()" class="operator">=</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let screen = document.getElementById('screen');
+    let isSindhi = true; // Start in Sindhi mode by default
+
+    function appendNumber(number) {
+      if (screen.textContent === '۰' || screen.textContent === '0') {
+        screen.textContent = number;
+      } else {
+        screen.textContent += number;
+      }
+    }
+
+    function clearScreen() {
+      screen.textContent = isSindhi ? '۰' : '0';
+    }
+
+    function backspace() {
+      screen.textContent = screen.textContent.slice(0, -1) || (isSindhi ? '۰' : '0');
+    }
+
+    function operate(operator) {
+      screen.textContent += operator;
+    }
+
+    function calculate() {
+      try {
+        let expression = isSindhi ? convertToEnglish(screen.textContent) : screen.textContent;
+        let result = eval(expression); // Perform the calculation
+        screen.textContent = isSindhi ? convertToSindhi(result.toString()) : result.toString();
+      } catch {
+        screen.textContent = 'Error';
+      }
+    }
+
+    function toggleNumerals() {
+      isSindhi = !isSindhi;
+
+      // Update buttons to show appropriate numerals
+      const numbers = isSindhi
+        ? ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹']
+        : ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
+      for (let i = 0; i <= 9; i++) {
+        document.getElementById(`num${i}`).textContent = numbers[i];
+        document.getElementById(`num${i}`).setAttribute("onclick", `appendNumber('${numbers[i]}')`);
+      }
+
+      // Update the screen and button texts
+      screen.textContent = isSindhi ? convertToSindhi(screen.textContent) : convertToEnglish(screen.textContent);
+      document.getElementById('toggle-btn').textContent = isSindhi ? 'تبديل' : 'Change';
+      document.getElementById('clear-btn').textContent = isSindhi ? 'ساف' : 'Clear';
+    }
+
+    function convertToEnglish(text) {
+      return text
+        .replace(/۰/g, '0')
+        .replace(/۱/g, '1')
+        .replace(/۲/g, '2')
+        .replace(/۳/g, '3')
+        .replace(/۴/g, '4')
+        .replace(/۵/g, '5')
+        .replace(/۶/g, '6')
+        .replace(/۷/g, '7')
+        .replace(/۸/g, '8')
+        .replace(/۹/g, '9');
+    }
+
+    function convertToSindhi(text) {
+      return text
+        .replace(/0/g, '۰')
+        .replace(/1/g, '۱')
+        .replace(/2/g, '۲')
+        .replace(/3/g, '۳')
+        .replace(/4/g, '۴')
+        .replace(/5/g, '۵')
+        .replace(/6/g, '۶')
+        .replace(/7/g, '۷')
+        .replace(/8/g, '۸')
+        .replace(/9/g, '۹');
+    }
+  </script>
+</body>
+</html>
